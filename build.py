@@ -67,20 +67,20 @@ with open(manifest_path, 'w') as manifest_file:
 
 # Extract the certificate from the .p12 file
 subprocess.run([
-    "openssl", "pkcs12", "-in", P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
+    "openssl", "pkcs12", "-in", 'certificates/' + P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
     "-nokeys", "-out", "cert.pem", "-legacy"
 ], check=True)
 
 # Extract the private key from the .p12 file
 subprocess.run([
-    "openssl", "pkcs12", "-in", P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
+    "openssl", "pkcs12", "-in", 'certificates/' + P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
     "-nocerts", "-out", "key.pem", "-nodes", "-legacy"
 ], check=True)
 
 # Sign the manifest.json using the certificate and private key
 subprocess.run([
     "openssl", "smime", "-sign", "-in", manifest_path, "-out", os.path.join(DIRECTORY, 'signature'),
-    "-outform", "DER", "-nodetach", "-binary", "-signer", "cert.pem", "-inkey", "key.pem", "-certfile", "wwdr.pem"
+    "-outform", "DER", "-nodetach", "-binary", "-signer", "cert.pem", "-inkey", "key.pem", "-certfile", "certificates/wwdr.pem"
 ], check=True)
 
 # Remove temporary signing files

@@ -1,0 +1,8 @@
+__pycache__
+.DS_Store
+secret.py
+certificate.p12
+Fitness SF.pass/pass.json
+Fitness SF.pass/signature
+Fitness SF.pass/manifest.json
+Fitness SF.pkpass

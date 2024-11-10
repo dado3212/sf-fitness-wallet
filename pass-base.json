@@ -1,0 +1,68 @@
+{
+    "associatedStoreIdentifiers": [1484657961],
+    "backgroundColor": "rgb(254,79,2)",
+    "foregroundColor": "rgb(255,255,255)",
+    "description" : "Fitness SF Membership Badge",
+    "formatVersion" : 1,
+    "organizationName": "Fitness SF",
+    "sharingProhibited": true,
+    "labelColor": "rgb(255,255,255)",
+    "maxDistance": 100,
+    "locations": [
+        {
+            "relevantText": "You're near FitnessSF: SF Embarcadero",
+            "latitude": 37.795039764893595,
+            "longitude": -122.39818541715097
+        },
+        {
+            "relevantText": "You're near FitnessSF: SF Castro",
+            "latitude": 37.76368493997762,
+            "longitude": -122.43340985733288
+        },
+        {
+            "relevantText": "You're near FitnessSF: SF Mid Market",
+            "latitude": 37.776281694428256,
+            "longitude":  -122.41644842639109
+        },
+        {
+            "relevantText": "You're near FitnessSF: SF SOMA",
+            "latitude": 37.76958692420093,
+            "longitude": -122.40695883275058
+        },
+        {
+            "relevantText": "You're near FitnessSF: SF Fillmore",
+            "latitude": 37.78289138441853,
+            "longitude": -122.43364392545595
+        },
+        {
+            "relevantText": "You're near FitnessSF: SF Transbay",
+            "latitude": 37.7890177098455,
+            "longitude": -122.39708446899624
+        },
+        {
+            "relevantText": "You're near FitnessSF: Oakland",
+            "latitude": 37.80965380057921,
+            "longitude":  -122.24978286241235
+        },
+        {
+            "relevantText": "You're near FitnessSF: Marin",
+            "latitude": 37.93833125807153,
+            "longitude": -122.51790174433596
+        }
+    ],
+    "storeCard": {
+        "headerFields": [{
+            "key": "header",
+            "value": "Member"
+        }],
+        "secondaryFields": [{
+            "key": "secondary",
+            "label": "Name"
+        }],
+        "auxiliaryFields": [{
+            "row": 1,
+            "key": "aux",
+            "label": "Member ID"
+        }]
+    }
+}

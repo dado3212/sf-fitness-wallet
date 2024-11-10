@@ -1,7 +1,7 @@
 import os, hashlib, json, subprocess, shutil
 from secret import MEMBER_ID, TEAM_IDENTIFIER, NAME, P12_FILE_PATH, P12_PASSWORD, PASS_IDENTIFIER
 
-DIRECTORY = 'Fitness SF.pass'
+DIRECTORY = 'pass'
 
 # Calculate the SHA1 hash of a file.
 def calculate_sha1(filepath):
@@ -14,35 +14,40 @@ def calculate_sha1(filepath):
             sha1.update(data)
     return sha1.hexdigest()
 
-# Clear the old files if they exist
-# os.remove('Fitness SF.pass/')
+# Create a temporary directory (deleting if it exists)
+if os.path.exists(DIRECTORY):
+    shutil.rmtree(DIRECTORY)
+os.mkdir(DIRECTORY)
 
-# Load up the base pass JSON file
-with open('pass-base.json', 'r') as f:
-    loaded = json.load(f)
-    loaded['passTypeIdentifier'] = PASS_IDENTIFIER
-    loaded['serialNumber'] = MEMBER_ID
-    loaded['teamIdentifier'] = TEAM_IDENTIFIER
-    loaded['barcodes'] = [{
+# Copy in the image assets
+for filename in os.listdir('images'):
+    source_path = os.path.join('images', filename)
+    destination_path = os.path.join(DIRECTORY, filename)
+    shutil.copy2(source_path, destination_path)
+    
+# Using the Pass template and the secret variables (see README) create
+# the main pass.json file
+with open('pass.template.json', 'r') as f:
+    pass_json = json.load(f)
+    pass_json['passTypeIdentifier'] = PASS_IDENTIFIER
+    pass_json['serialNumber'] = MEMBER_ID
+    pass_json['teamIdentifier'] = TEAM_IDENTIFIER
+    pass_json['barcodes'] = [{
         "message": MEMBER_ID,
         "format": "PKBarcodeFormatQR",
         "messageEncoding": "iso-8859-1",
         "altText": MEMBER_ID
     }]
-    loaded['storeCard']['secondaryFields'][0]['value'] = NAME
-    loaded['storeCard']['auxiliaryFields'][0]['value'] = MEMBER_ID
+    pass_json['storeCard']['secondaryFields'][0]['value'] = NAME
+    pass_json['storeCard']['auxiliaryFields'][0]['value'] = MEMBER_ID
     
-    with open('FItness SF.pass/pass.json', 'w') as x:
-        json.dump(loaded, x, indent=4)
+    with open(DIRECTORY + '/pass.json', 'w') as pass_file:
+        json.dump(pass_json, pass_file, indent=4)
 
-"""Generate a manifest.json with SHA1 hashes for each file in the directory."""
+# Generate a manifest.json with SHA1 hashes for each file in the directory.
 manifest = {}
 for root, dirs, files in os.walk(DIRECTORY):
     for filename in files:
-        # Skip manifest + signature files
-        if filename in ['manifest.json', 'signature']:
-            continue
-
         # Get the relative path to the file
         filepath = os.path.join(root, filename)
         relpath = os.path.relpath(filepath, DIRECTORY)
@@ -52,42 +57,39 @@ for root, dirs, files in os.walk(DIRECTORY):
         
         # Add the file's relative path and its SHA1 hash to the manifest
         manifest[relpath.replace(os.sep, '/')] = sha1_hash
-
+        
 # Save manifest.json
 manifest_path = os.path.join(DIRECTORY, 'manifest.json')
 with open(manifest_path, 'w') as manifest_file:
     json.dump(manifest, manifest_file, indent=4)
     
-"""Sign it.""" 
-# Build the OpenSSL command
-openssl_command = [
-    "openssl", "pkcs12", "-in", P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
-    "-nokeys", "-out", "cert.pem", "-legacy"
-]
+# Sign the file
 
 # Extract the certificate from the .p12 file
-subprocess.run(openssl_command, check=True)
-
-openssl_command = [
+subprocess.run([
     "openssl", "pkcs12", "-in", P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
-    "-nocerts", "-out", "key.pem", "-nodes", "-legacy"
-]
+    "-nokeys", "-out", "cert.pem", "-legacy"
+], check=True)
 
 # Extract the private key from the .p12 file
-subprocess.run(openssl_command, check=True)
+subprocess.run([
+    "openssl", "pkcs12", "-in", P12_FILE_PATH, "-passin", f"pass:{P12_PASSWORD}",
+    "-nocerts", "-out", "key.pem", "-nodes", "-legacy"
+], check=True)
 
 # Sign the manifest.json using the certificate and private key
-openssl_sign_command = [
+subprocess.run([
     "openssl", "smime", "-sign", "-in", manifest_path, "-out", os.path.join(DIRECTORY, 'signature'),
     "-outform", "DER", "-nodetach", "-binary", "-signer", "cert.pem", "-inkey", "key.pem", "-certfile", "wwdr.pem"
-]
+], check=True)
 
-# Run the OpenSSL command to create the detached signature
-subprocess.run(openssl_sign_command, check=True)
-
+# Remove temporary signing files
 os.remove('cert.pem')
 os.remove('key.pem')
 
 # Zip it up
 shutil.make_archive('Fitness SF', 'zip', DIRECTORY)
 os.rename('Fitness SF.zip', 'Fitness SF.pkpass')
+
+# Delete the temporary directory
+shutil.rmtree(DIRECTORY)

@@ -41,7 +41,7 @@ MEMBER_ID = '<SF Fitness Member ID>'
 * `PASS_IDENTIFIER` is what you chose in Step 4, in my case `pass.com.hackingdartmouth`.
 * `MEMBER_ID` is your SF Fitness Member ID. You can get it by scanning the QR code in the app, though I think it tends to be the first 9 digits of your phone #.
 
-Alternatively you can log in to [https://portal.fitnesssf.com](https://portal.fitnesssf.com) and run the following code in Console to print it out:
+Alternatively you can log in to [https://portal.fitnesssf.com/login](https://portal.fitnesssf.com/login) and run the following code in Console to print it out:
 ```
 JSON.parse(decodeURIComponent(atob((document.cookie.match('(^|;)\\s*access_token\\s*=\\s*([^;]+)')?.pop() || '').split(".")[1].replace(/-/g, "+").replace(/_/g, "/")).split("").map(e => "%" + ("00" + e.charCodeAt(0).toString(16)).slice(-2)).join("")))['scanCode']
 ```
